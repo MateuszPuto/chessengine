@@ -1,5 +1,5 @@
 import chess
-import torch
+from torch import Tensor
 
 def bitboard(board):
     '''Converts chess.Board representation of position into bitboard containing 16 planes: 12 for pieces,
@@ -63,7 +63,7 @@ def bitboard(board):
         bitboard[14] = 0
     
     if(board.turn == chess.BLACK):
-        bitboard[15] = (1 << 64) - 1
+        bitboard[15] = 1
     else:
         bitboard[15] = 0
         
@@ -77,7 +77,7 @@ def bitboard_to_tensor(bitboard):
         string = format(plane, 'b').rjust(64, '0')
         li += [int(x) for x in list(string)[::-1]]
         
-    return torch.Tensor(li)
+    return Tensor(li)
 
 def bitboard_to_cnn_input(bitboard):
     '''Converts bitboard to pytorch tensor with shape (16, 8, 8)'''
@@ -91,4 +91,4 @@ def bitboard_to_cnn_input(bitboard):
             li[i].append([])
             li[i][-1] += [int(x) for x in list(elem)[::-1]]
         
-    return torch.Tensor(li)
+    return Tensor(li)
