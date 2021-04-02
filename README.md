@@ -30,3 +30,4 @@ We try to perform embedding from vector of length 1024 to 256. To do so convolut
 
 # Logs
 - Layerwise training of autoencoder from 700 loss (0.68 pawn diff per repr. square) to 23 loss (~0.02). This should ideally be imporved by one order of magnitude. The pieces at the rim of the board are decoded the worst. Maybe padding is necessary.
+- We trained the autoencoder again using layerwise training, followed by whole model retraining. The padding parameter was added to the model. We got around 6.5x improvement on our previous attempt resulting in loss of around 3.5 (~0.0035). The model seems to perform rather well, although it still makes mistakes.
