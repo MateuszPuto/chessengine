@@ -23,11 +23,13 @@ class autoencoder(nn.Module):
         self.encoder4 = nn.Sequential(
             nn.Conv2d(128, 256, 3),
             nn.ReLU(True),
+            nn.MaxPool2d(4),
         )
        
         self.decoder1 = nn.Sequential(
             nn.ConvTranspose2d(256, 128, 3),
             nn.ReLU(True),
+            torch.nn.MaxUnpool2d(4),
         )
         self.decoder2 = nn.Sequential(
             nn.ConvTranspose2d(128, 64, 3, padding=1),
@@ -71,9 +73,10 @@ class autoencoder(nn.Module):
         return x
     
     def encode(self, x):
-        x = self.encoder1(x)
-        x = self.encoder2(x)
-        x = self.encoder3(x)
-        x = self.encoder4(x)
+        with torch.no_grad():
+            x = self.encoder1(x)
+            x = self.encoder2(x)
+            x = self.encoder3(x)
+            x = self.encoder4(x)
         
         return x
