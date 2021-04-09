@@ -3,6 +3,7 @@ import autoencoder
 import chess
 import math
 import copy
+import operator
 
 class Node:
     def __init__(self, position):
@@ -32,6 +33,9 @@ class Score:
     
     def get_node(self):
         return self.node
+    
+    def __gt__(self, other):
+        return self.value > other.value
         
 def alphabeta(node, depth, alpha, beta, valueNet):
     '''Basic alpha-beta search procedure'''
@@ -43,9 +47,10 @@ def alphabeta(node, depth, alpha, beta, valueNet):
 
     node.get_children()
     
-    score = None
+    score = Score(-math.inf, node)
     for child in node.childNodes:
-        score = Score(-alphabeta(child, depth-1, -beta, -alpha, valueNet).get_val(), child)
+        currScore = Score(-alphabeta(child, depth-1, -beta, -alpha, valueNet).get_val(), child)
+        if currScore > score: score = currScore
         alpha = max(alpha, score.get_val())
             
         if alpha >= beta:
