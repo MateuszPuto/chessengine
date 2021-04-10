@@ -1,9 +1,9 @@
 import bitboards
 import autoencoder
-import chess
 import math
 import copy
 import operator
+import torch
 
 class Node:
     def __init__(self, position):
@@ -17,8 +17,7 @@ class Node:
             board.push(move)
             self.childNodes.append(Node(board))
     
-    def get_bitboard(self):
-        encoder = autoencoder.autoencoder()
+    def get_bitboard(self, encoder):
         return encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(self.state)).unsqueeze(0)).view(1, -1)
 
     
@@ -37,11 +36,10 @@ class Score:
     def __gt__(self, other):
         return self.value > other.value
         
-def alphabeta(node, depth, alpha, beta, valueNet):
-    '''Basic alpha-beta search procedure'''
-    
+def alphabeta(node, depth, alpha, beta, valueNet, encoder):
+    '''Basic alpha-beta search procedure'''    
     if depth == 0 or node.state.is_game_over():
-        value, policy = valueNet(node.get_bitboard())
+        value, policy = valueNet(node.get_bitboard(encoder))
         
         return Score(value, node)
 
