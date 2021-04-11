@@ -18,7 +18,7 @@ class Node:
             self.childNodes.append(Node(board))
     
     def get_bitboard(self, encoder):
-        return encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(self.state)).unsqueeze(0)).view(1, -1)
+        return encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(self.state)).unsqueeze(0).cuda()).view(1, -1)
 
     
     
@@ -39,7 +39,7 @@ class Score:
 def alphabeta(node, depth, alpha, beta, valueNet, encoder):
     '''Basic alpha-beta search procedure'''    
     if depth == 0 or node.state.is_game_over():
-        value, policy = valueNet(node.get_bitboard(encoder))
+        value, policy = valueNet(node.get_bitboard(encoder).cuda())
         
         return Score(value, node)
 
@@ -47,7 +47,7 @@ def alphabeta(node, depth, alpha, beta, valueNet, encoder):
     
     score = Score(-math.inf, node)
     for child in node.childNodes:
-        currScore = Score(-alphabeta(child, depth-1, -beta, -alpha, valueNet).get_val(), child)
+        currScore = Score(-alphabeta(child, depth-1, -beta, -alpha, valueNet, encoder).get_val(), child)
         if currScore > score: score = currScore
         alpha = max(alpha, score.get_val())
             

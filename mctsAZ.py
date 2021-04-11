@@ -3,12 +3,13 @@ import autoencoder
 import helperfuncs
 import chess
 import math
+import copy
 
 Cpuct = 5
 
 def evaluate(position, nn, encoder):
-    embdding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0)).view(1, -1)
-    return nn(embedding)
+    embedding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0).cuda()).view(1, -1)
+    return nn(embedding.cuda())
     
 class Node:
     def __init__(self, parentNode, position):
@@ -16,14 +17,14 @@ class Node:
         self.childNodes = []
 
         self.state = position
-        self.moves = helperfuncs.move_list(position)
+        self.moves = position.legal_moves
         self.noVisits = 0
         self.actionValue = 0
         self.priorProbability = None
         self.evaluation = None
         
     def set_value(self, value):
-        self.evalution = value
+        self.evaluation = value
         
     def set_prior(self, policy):
         self.priorProbability = helperfuncs.probability_distribution(policy, self.state)
@@ -31,7 +32,7 @@ class Node:
     def get_uct(self, i):
         return self.childNodes[i].actionValue + Cpuct * self.priorProbability[i][1] * math.sqrt(self.noVisits) / (1 + self.childNodes[i].noVisits)
     
-    def add_child(self, node):
+    def add(self, node):
         self.childNodes.append(node)
         
 class Mcts:
@@ -66,12 +67,12 @@ class Mcts:
     def expand(self, n):
         moves = n.moves
         
-        value, policy = evaluate(n.position, self.nnet, self.encoder)
+        value, policy = evaluate(n.state, self.nnet, self.encoder)
         n.set_value(value)
         n.set_prior(policy)
         
         for move in moves:
-            board = copy.deepcopy(n.position)
+            board = copy.deepcopy(n.state)
             board.push(move)
                 
             newNode = Node(n, board)
@@ -86,6 +87,6 @@ class Mcts:
             val = 1 - val
             n = n.parentNode
             
-            node.actionValue += (node.noVisits * node.actionValue + val) / (node.noVisits + 1)
-            node.noVisits += 1
+            n.actionValue += (n.noVisits * n.actionValue + val) / (n.noVisits + 1)
+            n.noVisits += 1
     

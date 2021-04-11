@@ -3,7 +3,7 @@ import autoencoder
 import chess
 
 def evaluate(position, nn, encoder):
-    embdding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0)).view(1, -1)
+    embedding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0)).view(1, -1)
     return nn(embedding)
     
 class Node:
@@ -57,7 +57,7 @@ class Mcts:
     def expand(self, n):
         moves = n.moves
         
-        value, policy = evaluate(n.position, self.nnet, self.encoder)
+        value, policy = evaluate(n.state, self.nnet, self.encoder)
         n.set_value(value)
         n.set_prior(policy)
         
