@@ -1,6 +1,10 @@
 import bitboards
 import autoencoder
+import helperfuncs
 import chess
+import math
+
+Cpuct = 5
 
 def evaluate(position, nn, encoder):
     embdding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0)).view(1, -1)
@@ -12,7 +16,7 @@ class Node:
         self.childNodes = []
 
         self.state = position
-        self.moves = position.legal_moves
+        self.moves = helperfuncs.move_list(position)
         self.noVisits = 0
         self.actionValue = 0
         self.priorProbability = None
@@ -22,10 +26,10 @@ class Node:
         self.evalution = value
         
     def set_prior(self, policy):
-        self.priorProbability = policy
+        self.priorProbability = helperfuncs.probability_distribution(policy, self.state)
         
-    def get_uct(self):
-        pass
+    def get_uct(self, i):
+        return self.childNodes[i].actionValue + Cpuct * self.priorProbability[i][1] * math.sqrt(self.noVisits) / (1 + self.childNodes[i].noVisits)
     
     def add_child(self, node):
         self.childNodes.append(node)
@@ -41,16 +45,21 @@ class Mcts:
             node = self.choose()
             node = self.expand(node)
             self.backup(node)
-    
-        ##choose and return the best node
-        return None
+           
+        bestNode, visits = None, 0
+        for child in self.root.childNodes:
+            if child.noVisits > visits:
+                bestNode = child
+                visits = child.noVisits
+                
+        return bestNode
     
     def choose(self):
         n = self.root
         
         while len(n.childNodes) > 0:
             branching = len(n.childNodes)
-            n = n.childNodes[sorted([[n.get_uct(), i] for i in range(branching)], reverse=True)[0][1]]
+            n = n.childNodes[sorted([[n.get_uct(i), i] for i in range(branching)], reverse=True)[0][1]]
             
         return n
     
@@ -74,10 +83,9 @@ class Mcts:
         val = n.evaluation
         
         while n.parentNode != None:
-            val = 1 - val ##adversarial search
+            val = 1 - val
             n = n.parentNode
             
-            ## some update to 'actionValue' and 'noVisits'
-            ## node.actionValue += x
-            ## node.noVisits += 1
+            node.actionValue += (node.noVisits * node.actionValue + val) / (node.noVisits + 1)
+            node.noVisits += 1
     
