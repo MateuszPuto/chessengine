@@ -2,7 +2,7 @@ import chess.pgn
 import bitboards
 import copy
 
-pgn = open("/home/mateusz/CCRL/CCRL-4040.pgn")
+pgn = open("/home/mputo/CCRL/CCRL-4040.pgn")
 
 def next_game():
     """Returns next game in a pgn file"""

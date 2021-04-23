@@ -9,56 +9,54 @@ class autoencoder(nn.Module):
         super(autoencoder, self).__init__()
         
         self.encoder1 = nn.Sequential(
-            nn.Conv2d(16, 32, 2, padding=1),
+            nn.Conv2d(16, 32, 2),
             nn.ReLU(True),
         )
         self.encoder2 = nn.Sequential(
-            nn.Conv2d(32, 64, 3, padding=1),
+            nn.Conv2d(32, 64, 3),
             nn.ReLU(True),
         )
         self.encoder3 = nn.Sequential(
-            nn.Conv2d(64, 128, 3, padding=1),
+            nn.Conv2d(64, 128, 3),
             nn.ReLU(True),
         )
         self.encoder4 = nn.Sequential(
             nn.Conv2d(128, 256, 3),
             nn.ReLU(True),
-            nn.MaxPool2d(4),
         )
        
         self.decoder1 = nn.Sequential(
             nn.ConvTranspose2d(256, 128, 3),
             nn.ReLU(True),
-            torch.nn.MaxUnpool2d(4),
         )
         self.decoder2 = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, 3, padding=1),
+            nn.ConvTranspose2d(128, 64, 3),
             nn.ReLU(True),
         )
         self.decoder3 = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, 3, padding=1),
+            nn.ConvTranspose2d(64, 32, 3),
             nn.ReLU(True),
         )
         self.decoder4 = nn.Sequential(
-            nn.ConvTranspose2d(32, 16, 2, padding=1),
+            nn.ConvTranspose2d(32, 16, 2),
             nn.Sigmoid()
         )
         
     def forward(self, x):
-#         for param in self.encoder1.parameters():
-#             param.requires_grad = False
-#         for param in self.decoder4.parameters():
-#             param.requires_grad = False
+        for param in self.encoder1.parameters():
+            param.requires_grad = False
+        for param in self.decoder4.parameters():
+            param.requires_grad = False
             
-#         for param in self.encoder2.parameters():
-#             param.requires_grad = False
-#         for param in self.decoder3.parameters():
-#             param.requires_grad = False
+        for param in self.encoder2.parameters():
+            param.requires_grad = False
+        for param in self.decoder3.parameters():
+            param.requires_grad = False
 
-#         for param in self.encoder3.parameters():
-#             param.requires_grad = False
-#         for param in self.decoder2.parameters():
-#             param.requires_grad = False
+        for param in self.encoder3.parameters():
+            param.requires_grad = False
+        for param in self.decoder2.parameters():
+            param.requires_grad = False
             
         x = self.encoder1(x)
         x = self.encoder2(x)
