@@ -15,12 +15,12 @@ class Fraction:
         self.x = x
         self.y = y
     
-    def value(self):
-        return self.x / self.y
+    def value(self, i):
+        return self.x[i] / self.y
     
-    def modify_by_delta(self, dx):
-        delta = cLog * dx / (self.av * pow(self.av, 2))
-        self.x += delta
+    def modify_by_delta(self, i, dx):
+        delta = cLog * dx / (self.av[i] * pow(self.av[i], 2))
+        self.x[i] += delta
         self.y += delta
 
 def evaluate(position, nn, encoder):
@@ -28,10 +28,10 @@ def evaluate(position, nn, encoder):
     return nn(embedding.cuda())
     
 class Node:
-    def __init__(self, parentNode, position):
+    def __init__(self, parentNode, position, nodeNum):
         self.parentNode = parentNode
         self.childNodes = []
-        self.expanded = 0
+        self.nodeNum = nodeNum
 
         self.state = position
         self.moves = position.legal_moves
@@ -53,16 +53,14 @@ class Node:
         return 1/(-math.log(value, cParam))
         
     def set_choiceProbability(self, weights, actionValues, sumOfWeights):
-        self.choiceProbability = []
-        for i in range(len(weights)):
-            self.choiceProbability.append(Fraction(weights[i], sumOfWeights, actionValues[i]))
+        self.choiceProbability = Fraction(weights, sumOfWeights, actionValues)
         
     def add(self, node):
         self.childNodes.append(node)
         
 class Mcts:
     def __init__(self, state, nn, encoder):
-        self.root = Node(None, state)
+        self.root = Node(None, state, 0)
         self.nnet = nn
         self.encoder = encoder
     
@@ -89,21 +87,9 @@ class Mcts:
             weights = n.choiceProbability
             
             if weights == 1:
-                if n.expanded == len(n.childNodes):
-                    weights, actionValues, sumOfWeights = [], [], 0
-
-                    for i in range(branching):
-                        weight = n.z(n.childNodes[i].actionValue)
-                        weights.append(weight)
-                        actionValues.append(n.childNodes[i].actionValue)
-                        sumOfWeights += weight
-
-                    n.set_choiceProbability(weights, actionValues, sumOfWeights)
-                else:
-                    weights = [x for _, x in n.priorProbability]
+                  weights = [x.item() for _, x in n.priorProbability]
             else:
-                  weights = [x.value() for x in weights]
-              
+                  weights = [weights.value(i) for i in range(len(weights.x))]
                  
             n = n.childNodes[random.choices(list(range(branching)), weights)[0]]
             
@@ -113,29 +99,30 @@ class Mcts:
         moves = n.moves
         
         value, policy = evaluate(n.state, self.nnet, self.encoder)
-        n.set_value(value)
+        n.set_value(value.item())
         n.set_prior(policy)
-        if n.parentNode != None:
-            n.parentNode.expanded += 1
         
-        for move in moves:
+        for i, move in enumerate(moves):
             board = copy.deepcopy(n.state)
             board.push(move)
-                
-            newNode = Node(n, board)
+            
+            newNode = Node(n, board, i)
             n.add(newNode)
+            
+        weights = [n.z(value) for node in n.childNodes]
+        n.set_choiceProbability(weights, [value for node in n.childNodes], sum(weights))
     
         return n
     
     def backup(self, n):
         while n.parentNode != None:
-            probability = n.choiceProbability
             val = 1 - n.actionValue ##adversarial search
-            n = n.parentNode
+            nnum = n.nodeNum
             
-            delta = probability * (val - n.actionValue)
+            n = n.parentNode
+            probability = n.choiceProbability
+
+            delta = probability.value(nnum) * (val - n.actionValue)
             n.actionValue += delta
             if type(n.choiceProbability) != int:
-                ##kidof terrible programming
-                n.choiceProbability[0].modify_by_delta(delta)
-    
+                probability.modify_by_delta(nnum, delta)
