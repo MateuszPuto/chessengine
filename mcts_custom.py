@@ -8,6 +8,10 @@ import copy
 
 cParam = 2
 cLog = math.log(cParam)
+cutoff = 0.9
+normParam = 1/(-math.log(cutoff, cParam))
+learningRate = 1
+minimalProbability = 0.001
 
 class Fraction:
     def __init__(self, x, y, av):
@@ -19,9 +23,11 @@ class Fraction:
         return self.x[i] / self.y
     
     def modify_by_delta(self, i, dx):
-        delta = cLog * dx / (self.av[i] * pow(self.av[i], 2))
-        self.x[i] += delta
-        self.y += delta
+        delta = cLog * dx / (max(self.av[i], minimalProbability) * pow(math.log(max(self.av[i], minimalProbability)), 2))
+        diff = min(cutoff, self.x[i] + delta) - self.x[i]
+        self.x[i] += diff
+        self.y += diff
+        self.av[i] += dx
 
 def evaluate(position, nn, encoder):
     embedding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0).cuda()).view(1, -1)
@@ -32,6 +38,7 @@ class Node:
         self.parentNode = parentNode
         self.childNodes = []
         self.nodeNum = nodeNum
+        self.visits = 0
 
         self.state = position
         self.moves = position.legal_moves
@@ -44,13 +51,17 @@ class Node:
         
     def set_value(self, value):
         self.evalution = value
-        self.actionValue = value
+        self.actionValue = self.z(value)
         
     def set_prior(self, policy):
         self.priorProbability = helperfuncs.probability_distribution(policy, self.state)
         
-    def z(self, value):
-        return 1/(-math.log(value, cParam))
+    def z(self, x):
+        '''Assuming the input is number between 0 and 1'''
+        return 1/(-normParam * math.log(x*cutoff, cParam))
+    
+    def z_inverse(self, y):
+        return pow(cParam, -1/y)
         
     def set_choiceProbability(self, weights, actionValues, sumOfWeights):
         self.choiceProbability = Fraction(weights, sumOfWeights, actionValues)
@@ -73,6 +84,7 @@ class Mcts:
         ##choose by highest actionValue for now
         bestNode, value = None, 0
         for child in self.root.childNodes:
+            print(child.choiceProbability.value(child.nodeNum), child.actionValue, child.visits)
             if child.actionValue and child.actionValue > value:
                 bestNode = child
                 value = child.actionValue
@@ -85,11 +97,7 @@ class Mcts:
         while len(n.childNodes) > 0:
             branching = len(n.childNodes)
             weights = n.choiceProbability
-            
-            if weights == 1:
-                  weights = [x.item() for _, x in n.priorProbability]
-            else:
-                  weights = [weights.value(i) for i in range(len(weights.x))]
+            weights = [weights.value(i) for i in range(len(weights.x))]
                  
             n = n.childNodes[random.choices(list(range(branching)), weights)[0]]
             
@@ -109,20 +117,22 @@ class Mcts:
             newNode = Node(n, board, i)
             n.add(newNode)
             
-        weights = [n.z(value) for node in n.childNodes]
-        n.set_choiceProbability(weights, [value for node in n.childNodes], sum(weights))
+        weights = [prior[1] for prior in n.priorProbability]
+        sumOfWeights = sum(weights)
+        n.set_choiceProbability([weight / sumOfWeights for weight in weights], [n.z_inverse(weight) for weight in weights], 1)
     
         return n
     
     def backup(self, n):
         while n.parentNode != None:
-            val = 1 - n.actionValue ##adversarial search
+            val = cutoff - n.actionValue ##adversarial search
             nnum = n.nodeNum
             
             n = n.parentNode
             probability = n.choiceProbability
-
-            delta = probability.value(nnum) * (val - n.actionValue)
+#             print(probability.value(nnum), val, n.actionValue)
+            delta = learningRate * probability.value(nnum) * (val - n.actionValue)
             n.actionValue += delta
             if type(n.choiceProbability) != int:
                 probability.modify_by_delta(nnum, delta)
+            n.visits += 1
