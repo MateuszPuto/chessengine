@@ -40,6 +40,9 @@ As noted earlier the classical Alpha-beta search is spetialized to deal with one
 
 Note: I will probably write more about this topic after I test and compare this solution to the other approaches.
 
+## Training pipeline
+to do
+
 # Logs
 - Layerwise training of autoencoder from 700 loss (0.68 pawn diff per repr. square) to 23 loss (~0.02).
 - Layerwise retraining of autoencoder up to under 10 loss (~0.01).

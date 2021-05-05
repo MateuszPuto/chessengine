@@ -21,7 +21,6 @@ class Node:
         return encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(self.state)).unsqueeze(0).cuda()).view(1, -1)
 
     
-    
 class Score:
     def __init__(self, value, node):
         self.value = value

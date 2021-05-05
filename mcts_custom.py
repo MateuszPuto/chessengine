@@ -80,9 +80,10 @@ class Mcts:
             self.backup(node)
     
         bestNode, value = None, 0
+        
         for child in self.root.childNodes:
             ##print(self.root.choiceProbability.value(child.nodeNum), child.actionValue, child.visits)
-            if child.actionValue > value:
+            if child.actionValue and child.actionValue > value:
                 bestNode = child
                 value = child.actionValue
                 

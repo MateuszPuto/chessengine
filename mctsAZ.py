@@ -81,12 +81,12 @@ class Mcts:
         return n
     
     def backup(self, n):
-        val = n.evaluation
+        val = n.evaluation.item()
         
         while n.parentNode != None:
             val = 1 - val
             n = n.parentNode
             
-            n.actionValue += (n.noVisits * n.actionValue + val) / (n.noVisits + 1)
+            n.actionValue = (n.noVisits * n.actionValue + val) / (n.noVisits + 1)
             n.noVisits += 1
     
