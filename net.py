@@ -15,10 +15,11 @@ class Net(nn.Module):
         self.fc4 = nn.Linear(n, n)
         
         self.fc_value = nn.Linear(n, 1)
-        self.fc_policy = nn.Linear(n, 128)
+        self.fc_policy1 = nn.Linear(n, 64)
+        self.fc_policy2 = nn.Linear(n, 64)
         
         self.sig = nn.Sigmoid()
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=2)
         
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -27,6 +28,7 @@ class Net(nn.Module):
         x = F.relu(self.fc4(x))
         
         value = self.fc_value(x)
-        policy = torch.reshape(self.fc_policy(x), (2, 64))
-        
-        return self.sig(value), [self.softmax(policy[0]), self.softmax(policy[0])]
+        policy1 = self.fc_policy1(x)
+        policy2 = self.fc_policy2(x)
+                
+        return self.sig(value), [self.softmax(policy1), self.softmax(policy2)]

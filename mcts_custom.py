@@ -36,7 +36,7 @@ class Fraction:
 
 def evaluate(position, nn, encoder):
     embedding = encoder.encode(bitboards.bitboard_to_cnn_input(bitboards.bitboard(position)).unsqueeze(0).cuda()).view(1, -1)
-    return nn(embedding.cuda())
+    return nn(embedding.cuda().unsqueeze(0))
     
 class Node:
     def __init__(self, parentNode, position, nodeNum):
