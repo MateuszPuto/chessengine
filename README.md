@@ -41,7 +41,7 @@ As noted earlier the classical Alpha-beta search is spetialized to deal with one
 Note: I will probably write more about this topic after I test and compare this solution to the other approaches.
 
 ## Training pipeline
-to do
+For now I hotfixed the problem with the system self-drawing for a 0.5 point draw reward. There is a problem with MCTS policy generation so for now it is recomended to use custom search tree option. As far as I can tell it comes with simpler interpretability, which is decent reason to use it in debugging. Eyeballing the training results on few batches it seems that training procedure is no longer totally broken. Hopefully will be able to say more nice things about it soon.
 
 # Logs
 - Layerwise training of autoencoder from 700 loss (0.68 pawn diff per repr. square) to 23 loss (~0.02).

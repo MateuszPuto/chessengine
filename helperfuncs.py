@@ -52,10 +52,10 @@ def policy_from_probability(distr):
     #normalized
     p1_sum = sum(policy[0])
     for i, elem in enumerate(policy[0]):
-            policy[0][i] = elem / p1_sum
+            policy[0][i] = elem / (p1_sum + 0.001)
             
     p2_sum = sum(policy[1])
     for i, elem in enumerate(policy[1]):
-            policy[1][i] = elem / p2_sum
+            policy[1][i] = elem / (p2_sum + 0.001)
                 
     return torch.Tensor(policy)
