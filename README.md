@@ -10,6 +10,15 @@ Usefull literture:\
 [Chessprogramming](https://www.chessprogramming.org/Main_Page)\
 [Python chess](https://python-chess.readthedocs.io/en/latest/)
 
+### Play with the engine in the browser
+![web gui for playing with engine](/pics/chess_gui.png)
+
+In order to run this on your local linux machine run commands:
+
+> export FLASK_APP=play_in_browser
+> flask run
+
+And go to the displayed ip address in browser. 
 
 ## Chess overview
 Chess is a game for two players in which win, draw and loss results are possible. The game consists of a state which is defined as an 8 by 8 board, with 6 types of pieces with respecive starting quantities: 8 pawns, 2 knights, 2 bishop, 2 rooks, 1 queen and 1 king for each player. Transitions of the position are clearly defined. Players can perform board transition alternately, starting with player with white pieces and shifting to player with black ones in a cycle. Every piece has an unique way of moving and attacking called commonly capturing, some of them such as en passant or castling are conditional, based on the board state. Pieces can capture opposing pices with attack move by occuping their square. King cannot be capured. When king is attaced it must be moved to another empty square or game becomes lost for the player that coudn't do so. There exists additional rule for promoting a pawn in which pawn that reaches other side of the board becomes different piece. There are few different ways of drawing a game which include stalemate, threefold repetition of the position and fifty-move rule. Game can be also lost by resignation or drawn by agreement. In competitive enviroments it is played with time controls where additional rules apply.
