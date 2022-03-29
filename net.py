@@ -12,7 +12,11 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(256, n)
         self.fc2 = nn.Linear(n, n)
         self.fc3 = nn.Linear(n, n)
-        self.fc4 = nn.Linear(n, n)
+        self.fc4 = nn.Linear(n, n)  
+        self.fc5 = nn.Linear(n, n)   
+        self.fc6 = nn.Linear(n, n)
+
+
         
         self.fc_value = nn.Linear(n, 1)
         self.fc_policy1 = nn.Linear(n, 64)
@@ -26,6 +30,8 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
         
         value = self.fc_value(x)
         policy1 = self.fc_policy1(x)
