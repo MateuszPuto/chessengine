@@ -16,6 +16,7 @@ Usefull literture:\
 In order to run this on your local linux machine run commands:
 
 > export FLASK_APP=play_in_browser
+>
 > flask run
 
 And go to the displayed ip address in browser. 
