@@ -6,6 +6,7 @@ import math
 import random
 import copy
 
+##Hyperparameters
 cParam = 2
 scale = 0.8
 minimalActionValue = 0.001
@@ -67,11 +68,29 @@ class Node:
     def add(self, node):
         self.childNodes.append(node)
         
+    def __str__(self):
+        return "* visited: " + str(self.visits).ljust(3) + ", actionValue: "  + str(round(self.actionValue, 6)).rjust(8)
+        
 class Mcts:
     def __init__(self, state, nn, encoder):
         self.root = Node(None, state, 0)
         self.nnet = nn
         self.encoder = encoder
+        
+    def print_tree(self, levels=math.inf):
+        def print_child_nodes(n, levels, tabulation=""):         
+            tabulation += "\t"
+             
+            if(levels > 0):                    
+                for i, n in enumerate(n.childNodes):
+                    if(n.visits > 0):
+                        print(tabulation + str(n) + ", choiceProbability: " + str(round(n.choiceProbability.value(i), 6)).rjust(8))
+                    print_child_nodes(n, levels-1, tabulation)
+            
+        
+        node = self.root
+        print(node)
+        print_child_nodes(node, levels)
     
     def search(self, rollouts):
         for rollout in range(rollouts):
@@ -82,7 +101,6 @@ class Mcts:
         bestNode, value = None, 0
         
         for child in self.root.childNodes:
-            ##print(self.root.choiceProbability.value(child.nodeNum), child.actionValue, child.visits)
             if child.actionValue and child.actionValue > value:
                 bestNode = child
                 value = child.actionValue

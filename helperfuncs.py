@@ -36,7 +36,8 @@ def probability_distribution(move, board):
     return distr
 
 def policy_from_probability(distr):
-    
+    '''Takes list of move probabilities, elements in format [move, probability] and returns respective policy
+    in the format of "from" and "to" matrix each of size 64x64. Uses square root to perform decomposition.'''
     policy = [[0 for i in range(64)], [0 for i in range(64)]]
     
     rank = {'a': 0,'b': 1,'c': 2,'d': 3,'e': 4,'f': 5,'g': 6,'h': 7}
@@ -49,7 +50,7 @@ def policy_from_probability(distr):
         policy[0][pos_from] += math.sqrt(val)
         policy[1][pos_to] += math.sqrt(val)
         
-    #normalized
+    #normalization procedure
     p1_sum = sum(policy[0])
     for i, elem in enumerate(policy[0]):
             policy[0][i] = elem / (p1_sum + 0.001)

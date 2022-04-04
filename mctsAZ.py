@@ -5,6 +5,7 @@ import chess
 import math
 import copy
 
+##Hyperparameters
 Cpuct = 5
 
 def evaluate(position, nn, encoder):
