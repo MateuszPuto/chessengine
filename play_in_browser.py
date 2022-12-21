@@ -14,4 +14,4 @@ encd_pt = "autoencoderftest2.pt"
 board = chess.Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 nodes = 50
 
-gui.start_server(app, engine_pt, encd_pt, board, nodes)
+server = gui.start_server(app, engine_pt, encd_pt, board, nodes)

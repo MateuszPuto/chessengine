@@ -59,3 +59,5 @@ def start_server(*args):
             svg = chess.svg.board(chessboard, size=500)
 
         return page(svg)
+
+    return app
