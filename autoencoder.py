@@ -71,10 +71,9 @@ class autoencoder(nn.Module):
         return x
     
     def encode(self, x):
-        with torch.no_grad():
-            x = self.encoder1(x)
-            x = self.encoder2(x)
-            x = self.encoder3(x)
-            x = self.encoder4(x)
+        x = self.encoder1(x)
+        x = self.encoder2(x)
+        x = self.encoder3(x)
+        x = self.encoder4(x)
         
         return x

@@ -19,7 +19,7 @@ class Net(nn.Module):
         self.fc_policy2 = nn.Linear(n, 64)
         
         self.sig = nn.Sigmoid()
-        self.softmax = nn.Softmax(dim=2)
+        self.softmax = nn.Softmax(dim=1)
         
     def forward(self, x):
         x = F.relu(self.fc1(x))
